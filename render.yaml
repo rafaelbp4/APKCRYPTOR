@@ -1,0 +1,32 @@
+services:
+  # Node.js Telegram Bot
+  - type: web
+    name: apk-protector-bot
+    runtime: node
+    rootDir: bot
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ENGINE_URL
+        fromService:
+          name: apk-protector-engine
+          type: web
+          property: host
+    healthCheckPath: /
+    autoDeploy: true
+
+  # Python FastAPI Engine (Docker - root Dockerfile)
+  - type: web
+    name: apk-protector-engine
+    runtime: docker
+    # Dockerfile এখন repo root এ আছে, কোনো path লাগবে না
+    envVars:
+      - key: PORT
+        value: 8000
+    disk:
+      name: tools-cache
+      mountPath: /tools
+      sizeGB: 2
+    autoDeploy: true
